@@ -6,18 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
-interface SignupFormProps {
-  onSignup: (email: string, password: string, username: string) => Promise<void>;
-}
-
-const SignupForm = ({ onSignup }: SignupFormProps) => {
+const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,19 +41,10 @@ const SignupForm = ({ onSignup }: SignupFormProps) => {
     setIsLoading(true);
     
     try {
-      await onSignup(email, password, username);
-      toast({
-        title: "Account created",
-        description: "Your account has been created successfully!",
-      });
+      await signup(email, password, username);
       navigate("/login");
     } catch (error) {
-      console.error("Signup error:", error);
-      toast({
-        title: "Signup failed",
-        description: "There was an error creating your account. Please try again.",
-        variant: "destructive",
-      });
+      // Error is already handled in the signup function
     } finally {
       setIsLoading(false);
     }

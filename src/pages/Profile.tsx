@@ -1,41 +1,140 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { User, Mail, Calendar, Trophy } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock user data
-const mockUser = {
-  username: "GamerPro123",
-  email: "gamer@example.com",
-  joined: "January 2023",
-  bio: "Passionate gamer with a love for RPGs and strategy games.",
-  achievements: 148,
-  totalGames: 24,
-  totalPlaytime: "328h"
-};
+interface ProfileData {
+  id: string;
+  username: string;
+  created_at: string;
+}
+
+interface UserStats {
+  totalGames: number;
+  totalPlaytime: number;
+  totalAchievements: number;
+}
 
 const Profile = () => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState(mockUser.username);
-  const [bio, setBio] = useState(mockUser.bio);
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("Passionate gamer with a love for RPGs and strategy games.");
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalGames: 0,
+    totalPlaytime: 0,
+    totalAchievements: 0
+  });
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   
-  const handleSaveProfile = () => {
-    // This would be replaced with Supabase update logic
-    console.log("Updating profile:", { username, bio });
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data) {
+          setProfileData(data);
+          setUsername(data.username);
+        }
+        
+        // Fetch user stats
+        const [gamesResponse, achievementsResponse] = await Promise.all([
+          supabase
+            .from('user_games')
+            .select('hours_played')
+            .eq('user_id', user.id),
+          supabase
+            .from('user_achievements')
+            .select('id')
+            .eq('user_id', user.id)
+        ]);
+        
+        if (gamesResponse.error) throw gamesResponse.error;
+        if (achievementsResponse.error) throw achievementsResponse.error;
+        
+        const totalGames = gamesResponse.data.length;
+        const totalPlaytime = gamesResponse.data.reduce((acc, game) => acc + Number(game.hours_played), 0);
+        const totalAchievements = achievementsResponse.data.length;
+        
+        setUserStats({
+          totalGames,
+          totalPlaytime,
+          totalAchievements
+        });
+        
+      } catch (error: any) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Mock successful update
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully."
-    });
+    fetchProfile();
+  }, [user, toast]);
+  
+  const handleSaveProfile = async () => {
+    if (!user) return;
     
-    setIsEditing(false);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ username })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully."
+      });
+      
+      if (profileData) {
+        setProfileData({
+          ...profileData,
+          username
+        });
+      }
+      
+      setIsEditing(false);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive"
+      });
+    }
   };
+  
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center">Loading profile...</p>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -52,26 +151,26 @@ const Profile = () => {
               <h2 className="text-xl font-bold">{username}</h2>
               <div className="flex items-center text-gray-400 text-sm mt-1">
                 <Mail className="w-4 h-4 mr-1" />
-                <span>{mockUser.email}</span>
+                <span>{user?.email}</span>
               </div>
               <div className="flex items-center text-gray-400 text-sm mt-1">
                 <Calendar className="w-4 h-4 mr-1" />
-                <span>Joined {mockUser.joined}</span>
+                <span>Joined {profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString() : 'Recently'}</span>
               </div>
             </div>
             
             <div className="mt-6 pt-6 border-t border-gray-800">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-400">Games</span>
-                <span className="font-medium">{mockUser.totalGames}</span>
+                <span className="font-medium">{userStats.totalGames}</span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-gray-400">Playtime</span>
-                <span className="font-medium">{mockUser.totalPlaytime}</span>
+                <span className="font-medium">{userStats.totalPlaytime}h</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Achievements</span>
-                <span className="font-medium">{mockUser.achievements}</span>
+                <span className="font-medium">{userStats.totalAchievements}</span>
               </div>
             </div>
           </div>
@@ -119,8 +218,8 @@ const Profile = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => {
-                      setUsername(mockUser.username);
-                      setBio(mockUser.bio);
+                      if (profileData) setUsername(profileData.username);
+                      setBio("Passionate gamer with a love for RPGs and strategy games.");
                       setIsEditing(false);
                     }}
                   >

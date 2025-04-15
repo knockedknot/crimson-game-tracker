@@ -6,17 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
-interface LoginFormProps {
-  onLogin: (email: string, password: string) => Promise<void>;
-}
-
-const LoginForm = ({ onLogin }: LoginFormProps) => {
+const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,19 +31,10 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     setIsLoading(true);
     
     try {
-      await onLogin(email, password);
-      toast({
-        title: "Success",
-        description: "You have been logged in successfully!",
-      });
-      navigate("/");
+      await login(email, password);
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
+      // Error is already handled in the login function
     } finally {
       setIsLoading(false);
     }
