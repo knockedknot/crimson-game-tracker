@@ -1,6 +1,6 @@
 
 import { 
-  GameController, 
+  Gamepad2, 
   Clock, 
   Trophy, 
   Calendar 
@@ -75,7 +75,7 @@ const Dashboard = () => {
         <StatCard 
           title="Total Games"
           value="24"
-          icon={<GameController />}
+          icon={<Gamepad2 />}
           subtitle="Across all platforms"
         />
         <StatCard 

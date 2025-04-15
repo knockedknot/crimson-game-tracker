@@ -7,7 +7,7 @@ const Index = () => {
 
   // Redirect to Dashboard if logged in, otherwise to Login page
   if (isLoggedIn) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Navigate to="/login" replace />;

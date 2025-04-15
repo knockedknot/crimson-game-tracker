@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             
             <Route element={<AppLayout />}>
-              <Route path="/" element={
+              <Route index element={<Index />} />
+              <Route path="/dashboard" element={
                 <AuthGuard>
                   <Dashboard />
                 </AuthGuard>
