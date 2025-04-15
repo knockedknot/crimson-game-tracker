@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				poppins: ['Poppins', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,7 +65,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				crimson: {
+					DEFAULT: '#ea384c',
+					light: '#ff6070',
+					dark: '#c01e32',
+				},
+				playtrack: {
+					black: '#121212',
+					gray: '#8E9196',
+					lightgray: '#C8C8C9',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
