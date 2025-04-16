@@ -64,14 +64,27 @@ const Library = () => {
       // Fetch achievements counts for each game
       const gameIds = userGames?.map(game => game.games.id) || [];
       
-      // Get total achievements per game
-      const { data: achievementCounts, error: achievementError } = await supabase
-        .from('achievements')
-        .select('game_id, count')
-        .in('game_id', gameIds)
-        .group('game_id');
+      // Get total achievements per game using a more robust method
+      let achievementCounts: { game_id: string, count: number }[] = [];
+      if (gameIds.length > 0) {
+        const { data, error: achievementError } = await supabase
+          .from('achievements')
+          .select('game_id')
+          .in('game_id', gameIds);
+          
+        if (achievementError) throw achievementError;
         
-      if (achievementError) throw achievementError;
+        // Count achievements by game_id in JavaScript
+        const countByGameId: Record<string, number> = {};
+        data?.forEach(achievement => {
+          countByGameId[achievement.game_id] = (countByGameId[achievement.game_id] || 0) + 1;
+        });
+        
+        achievementCounts = Object.entries(countByGameId).map(([game_id, count]) => ({
+          game_id,
+          count
+        }));
+      }
       
       // Get earned achievements per game for this user
       const { data: earnedAchievements, error: earnedError } = await supabase
@@ -103,7 +116,7 @@ const Library = () => {
         hoursPlayed: Number(game.hours_played),
         achievements: {
           earned: earnedByGame[game.games.id] || 0,
-          total: achievementCounts?.find(a => a.game_id === game.games.id)?.count || 0
+          total: achievementCounts.find(a => a.game_id === game.games.id)?.count || 0
         },
         lastPlayed: game.last_played ? new Date(game.last_played).toLocaleDateString() : null
       })) || [];
