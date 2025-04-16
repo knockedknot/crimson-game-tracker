@@ -1,14 +1,12 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Clock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import GameCard from "@/components/dashboard/GameCard";
 
 interface Game {
   id: string;
   title: string;
-  cover: string;
   platforms: string[];
   genres: string[];
   hoursPlayed: number;
@@ -56,10 +54,29 @@ const RecentGamesSection = ({ games, loading, onAddGame }: RecentGamesSectionPro
           {games.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {games.map(game => (
-                <GameCard 
-                  key={game.id}
-                  {...game}
-                />
+                <div key={game.id} className="bg-card rounded-lg border border-gray-800 p-4">
+                  <h3 className="text-lg font-semibold mb-2">{game.title}</h3>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {game.platforms.map((platform) => (
+                      <span key={platform} className="text-xs bg-gray-700 text-white px-2 py-0.5 rounded">{platform}</span>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex items-center text-sm text-gray-300">
+                      <Clock className="w-4 h-4 mr-1" />
+                      <span>{game.hoursPlayed}h</span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-300">
+                      <Trophy className="w-4 h-4 mr-1" />
+                      <span>{game.achievements.earned}/{game.achievements.total}</span>
+                    </div>
+                  </div>
+                  {game.lastPlayed && (
+                    <div className="text-xs text-gray-400 mt-1">
+                      Last played: {game.lastPlayed}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           ) : (
