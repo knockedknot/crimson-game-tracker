@@ -30,9 +30,7 @@ import { Loader2 } from "lucide-react";
 const achievementFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  xp_value: z.string()
-    .refine(val => !isNaN(parseInt(val)) && parseInt(val) >= 0, "Must be a valid number")
-    .transform(val => parseInt(val)),
+  xp_value: z.coerce.number().min(0, "Must be a positive number"),
 });
 
 type AchievementFormValues = z.infer<typeof achievementFormSchema>;
@@ -65,7 +63,7 @@ const AchievementDialog = ({
     defaultValues: {
       name: achievement?.name || "",
       description: achievement?.description || "",
-      xp_value: achievement?.xp_value ? String(achievement.xp_value) : "10",
+      xp_value: achievement?.xp_value || 10,
     },
   });
 
@@ -179,6 +177,10 @@ const AchievementDialog = ({
                       placeholder="Enter XP value" 
                       min="0"
                       {...field} 
+                      onChange={(e) => {
+                        const value = e.target.valueAsNumber;
+                        field.onChange(!isNaN(value) ? value : 0);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

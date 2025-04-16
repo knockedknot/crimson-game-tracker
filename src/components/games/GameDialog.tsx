@@ -33,10 +33,7 @@ const gameFormSchema = z.object({
   platform: z.string().min(1, "Platform is required"),
   genre: z.string().min(1, "Genre is required"),
   publisher: z.string().optional(),
-  release_year: z.string()
-    .refine(val => !val || !isNaN(parseInt(val)), "Must be a valid year")
-    .transform(val => val ? parseInt(val) : null)
-    .optional(),
+  release_year: z.coerce.number().optional(),
 });
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
@@ -72,7 +69,7 @@ const GameDialog = ({
       platform: game?.platform || "",
       genre: game?.genre || "",
       publisher: game?.publisher || "",
-      release_year: game?.release_year ? String(game.release_year) : "",
+      release_year: game?.release_year || undefined,
     },
   });
 
@@ -226,7 +223,11 @@ const GameDialog = ({
                     <Input 
                       type="number" 
                       placeholder="Enter release year (optional)" 
-                      {...field} 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.valueAsNumber;
+                        field.onChange(!isNaN(value) ? value : undefined);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

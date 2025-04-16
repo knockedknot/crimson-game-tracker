@@ -14,8 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTabs,
-  DialogTab,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -45,9 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Clock, Trophy, Plus, Check } from "lucide-react";
 
 const progressFormSchema = z.object({
-  hours_played: z.string()
-    .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, "Must be a valid number")
-    .transform(val => parseFloat(val)),
+  hours_played: z.coerce.number().min(0, "Must be a non-negative number"),
 });
 
 type ProgressFormValues = z.infer<typeof progressFormSchema>;
@@ -88,7 +84,7 @@ const GameProgressDialog = ({
   const form = useForm<ProgressFormValues>({
     resolver: zodResolver(progressFormSchema),
     defaultValues: {
-      hours_played: gameData.hoursPlayed.toString(),
+      hours_played: gameData.hoursPlayed,
     },
   });
 
@@ -283,7 +279,11 @@ const GameProgressDialog = ({
                               step="0.1"
                               min="0"
                               placeholder="Enter hours played" 
-                              {...field} 
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.valueAsNumber;
+                                field.onChange(!isNaN(value) ? value : 0);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
