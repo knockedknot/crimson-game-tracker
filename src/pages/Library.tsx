@@ -15,7 +15,6 @@ interface Game {
   id: string;
   userGameId: string;
   title: string;
-  cover: string;
   platforms: string[];
   genres: string[];
   hoursPlayed: number;
@@ -196,54 +195,62 @@ const Library = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredGames.map(game => (
-                <Card key={game.id} className="overflow-hidden flex flex-col">
-                  <div className="relative">
-                    <img 
-                      src={game.cover} 
-                      alt={`${game.title} cover`} 
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60 p-4">
-                      <h3 className="text-white font-semibold text-lg">{game.title}</h3>
-                      <div className="flex mt-1 mb-2">
-                        {game.platforms.map((platform, i) => (
-                          <span key={`${game.id}-platform-${i}`} className="text-xs bg-gray-700 text-white px-2 py-0.5 rounded mr-1">{platform}</span>
-                        ))}
-                      </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <div className="flex items-center text-sm text-gray-300">
-                          <Clock className="w-4 h-4 mr-1" />
-                          <span>{game.hoursPlayed}h</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-300">
-                          <Trophy className="w-4 h-4 mr-1" />
-                          <span>{game.achievements.earned}/{game.achievements.total}</span>
-                        </div>
-                      </div>
-                      {game.lastPlayed && (
-                        <div className="text-xs text-gray-400 mt-2">
-                          Last played: {game.lastPlayed}
-                        </div>
-                      )}
+                <Card key={game.id} className="flex flex-col">
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-semibold mb-2">{game.title}</h3>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {game.platforms.map((platform, i) => (
+                        <span 
+                          key={`${game.id}-platform-${i}`} 
+                          className="text-xs bg-gray-700 text-white px-2 py-0.5 rounded"
+                        >
+                          {platform}
+                        </span>
+                      ))}
                     </div>
-                  </div>
-                  <CardContent className="p-4 flex justify-between">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEditGame(game)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    
-                    <Button 
-                      size="sm"
-                      onClick={() => handleUpdateProgress(game)}
-                    >
-                      <Clock className="h-4 w-4 mr-1" />
-                      Update Progress
-                    </Button>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {game.genres.map((genre, i) => (
+                        <span 
+                          key={`${game.id}-genre-${i}`} 
+                          className="text-xs bg-gray-600 text-white px-2 py-0.5 rounded"
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center text-sm">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>{game.hoursPlayed}h</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <Trophy className="w-4 h-4 mr-1" />
+                        <span>{game.achievements.earned}/{game.achievements.total}</span>
+                      </div>
+                    </div>
+                    {game.lastPlayed && (
+                      <div className="text-xs text-gray-400 mb-4">
+                        Last played: {game.lastPlayed}
+                      </div>
+                    )}
+                    <div className="flex justify-between mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditGame(game)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      
+                      <Button 
+                        size="sm"
+                        onClick={() => handleUpdateProgress(game)}
+                      >
+                        <Clock className="h-4 w-4 mr-1" />
+                        Update Progress
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
